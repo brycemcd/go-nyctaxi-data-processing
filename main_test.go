@@ -1,68 +1,68 @@
 package main
 
 import (
-  "testing"
-  //"fmt"
+	"testing"
+	//"fmt"
 )
 
 func TestValidateVendorId(t *testing.T) {
-  /* Valid vendor Ids are 1 and 2 */
+	/* Valid vendor Ids are 1 and 2 */
 
-  t.Parallel()
-  vendorIdTests := []struct {
-    vid string
-    valid bool
-    correctConvertedVID int
-    shouldBeValid bool
-  }{
-    {"1", true, 1, true},
-    {"2", true, 2, true},
-    {"foo", true, -1, false},
-  }
+	t.Parallel()
+	vendorIdTests := []struct {
+		vid                 string
+		valid               bool
+		correctConvertedVID int
+		shouldBeValid       bool
+	}{
+		{"1", true, 1, true},
+		{"2", true, 2, true},
+		{"foo", true, -1, false},
+	}
 
-  for _, test := range vendorIdTests {
-    test := test
-    testName := test.vid
-    t.Run(testName, func(t *testing.T) {
-      t.Parallel()
-      vid := validateVendorId(&test.vid, &test.valid)
+	for _, test := range vendorIdTests {
+		test := test
+		testName := test.vid
+		t.Run(testName, func(t *testing.T) {
+			t.Parallel()
+			vid := validateVendorId(&test.vid, &test.valid)
 
-      if(vid != test.correctConvertedVID || test.valid != test.shouldBeValid) {
-        t.Errorf("vid: %d != %d; %t != %t", vid, test.correctConvertedVID, test.valid, test.shouldBeValid)
-      }
-    })
-  }
+			if vid != test.correctConvertedVID || test.valid != test.shouldBeValid {
+				t.Errorf("vid: %d != %d; %t != %t", vid, test.correctConvertedVID, test.valid, test.shouldBeValid)
+			}
+		})
+	}
 }
 
 func TestValidateTripDistance(t *testing.T) {
-  /* tripDistance should be a float in the range of (0.00, 100.00] */
+	/* tripDistance should be a float in the range of (0.00, 100.00] */
 
-  t.Parallel()
-  tdTests := []struct {
-    td string
-    valid bool
-    correctConvertedTd float32
-    shouldBeValid bool
-  }{
-    {"1.00", true, 1.00, true},
-    {"1.23", true, 1.23, true},
-    {"foo", true, -1.0, false},
-    {"101.00", true, -1.0, false},
-    {"-1.00", true, -1.0, false},
-    {"0.00", true, -1.0, false},
-  }
+	t.Parallel()
+	tdTests := []struct {
+		td                 string
+		valid              bool
+		correctConvertedTd float32
+		shouldBeValid      bool
+	}{
+		{"1.00", true, 1.00, true},
+		{"1.23", true, 1.23, true},
+		{"foo", true, -1.0, false},
+		{"101.00", true, -1.0, false},
+		{"-1.00", true, -1.0, false},
+		{"0.00", true, -1.0, false},
+	}
 
-  for _, test := range tdTests {
-    test := test
-    testName := test.td
-    t.Run(testName, func(t *testing.T) {
-      t.Parallel()
-      convertedTd := validateTripDistance(&test.td, &test.valid)
+	for _, test := range tdTests {
+		test := test
+		testName := test.td
+		t.Run(testName, func(t *testing.T) {
+			t.Parallel()
+			convertedTd := validateTripDistance(&test.td, &test.valid)
 
-      if convertedTd != test.correctConvertedTd || test.valid != test.shouldBeValid {
-        t.Errorf("%s in should produce %f, not %f; valid should be %t, not %t",
-        test.td, test.correctConvertedTd, convertedTd, test.shouldBeValid, test.valid)
-      }
-    })
-  }
+			if convertedTd != test.correctConvertedTd || test.valid != test.shouldBeValid {
+				t.Errorf("%s in should produce %f, not %f; valid should be %t, not %t",
+					test.td, test.correctConvertedTd, convertedTd, test.shouldBeValid, test.valid)
+			}
+		})
+	}
 }
