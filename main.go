@@ -22,7 +22,7 @@ type YellowRow struct {
 	PickupDttm           time.Time
 	DropoffDttm          time.Time
 	PassengerCnt         int
-	TripDistance         string
+	TripDistance         float32
 	RatecodeID           string
 	StoreAndFwdFlag      string
 	PULocationID         string
@@ -49,16 +49,6 @@ func processTime(st string) time.Time {
 	//dropoffDttm, err := time.ParseInLocation(DTTM_FORMAT, row[2], loc)
 }
 
-func processInt(st string) int {
-	i, err := strconv.Atoi(st)
-
-	if err != nil {
-		return -1
-	}
-
-	return i
-}
-
 func convertRow(row []string) YellowRow {
 
 	// NOTE: we don't actually know it's valid yet. When setting the values below
@@ -70,8 +60,8 @@ func convertRow(row []string) YellowRow {
 		VendorID:             validateVendorId(&row[0], &isValid),
 		PickupDttm:           processTime(row[1]),
 		DropoffDttm:          processTime(row[2]),
-		PassengerCnt:         processInt(row[3]),
-		TripDistance:         row[4],
+		PassengerCnt:         validatePassengerCnt(&row[3], &isValid),
+		TripDistance:         validateTripDistance(&row[4], &isValid),
 		RatecodeID:           row[5],
 		StoreAndFwdFlag:      row[6],
 		PULocationID:         row[7],
@@ -105,7 +95,25 @@ func processRow(row []string) YellowRow {
 	return yrow
 }
 
+func validatePassengerCnt(passCnt *string, valid *bool) int {
+	i, err := strconv.Atoi(*passCnt)
+
+	if err != nil {
+		*valid = false
+		return -1
+	}
+
+	if i <= 0 || i > 5 {
+		*valid = false
+		return -1
+	}
+
+	return i
+}
+
 func validateTripDistance(tripDist *string, valid *bool) float32 {
+
+	fmt.Sprintf("tripDist is %s", *tripDist)
 	tripDistf, err := strconv.ParseFloat(*tripDist, 32)
 
 	if err != nil {

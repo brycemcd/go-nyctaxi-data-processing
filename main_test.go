@@ -34,6 +34,37 @@ func TestValidateVendorId(t *testing.T) {
 	}
 }
 
+func TestPassengerCnt(t *testing.T) {
+	/* Valid passenger cnts are between 1 and 4*/
+
+	t.Parallel()
+	passCntTests := []struct {
+		pcnt          string
+		valid         bool
+		correctPCnt   int
+		shouldBeValid bool
+	}{
+		{"1", true, 1, true},
+		{"2", true, 2, true},
+		{"0", true, -1, false},
+		{"100", true, -1, false},
+		{"foo", true, -1, false},
+	}
+
+	for _, test := range passCntTests {
+		test := test
+		testName := test.pcnt
+		t.Run(testName, func(t *testing.T) {
+			t.Parallel()
+			pcnt := validatePassengerCnt(&test.pcnt, &test.valid)
+
+			if pcnt != test.correctPCnt || test.valid != test.shouldBeValid {
+				t.Errorf("vid: %d != %d; %t != %t", pcnt, test.correctPCnt, test.valid, test.shouldBeValid)
+			}
+		})
+	}
+}
+
 func TestValidateTripDistance(t *testing.T) {
 	/* tripDistance should be a float in the range of (0.00, 100.00] */
 
