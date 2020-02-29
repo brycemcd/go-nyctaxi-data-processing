@@ -19,7 +19,8 @@ var (
 
 
 type YellowRow struct {
-  VendorID string
+  rawData []string
+  VendorID int
   PickupDttm time.Time
   DropoffDttm time.Time
   PassengerCnt int
@@ -37,6 +38,8 @@ type YellowRow struct {
   ImprovementSurcharge string
   TotalAmt string
   CongestionSurcharge string
+  Validated bool
+  Valid bool
 }
 
 func processTime(st string) time.Time {
@@ -59,13 +62,14 @@ func processInt(st string) int {
 }
 
 func convertRow(row []string) YellowRow {
-  // FIXME: shortcut for header for now
-  if row[0] == "VendorID" {
-    return YellowRow{}
-  }
+
+  // NOTE: we don't actually know it's valid yet. When setting the values below
+  // any of the validation methods may return false to invalidate the record
+  isValid := true
 
   return YellowRow{
-    VendorID: row[0],
+    rawData: row,
+    VendorID: validateVendorId(&row[0], &isValid),
     PickupDttm: processTime(row[1]),
     DropoffDttm: processTime(row[2]),
     PassengerCnt: processInt(row[3]),
@@ -83,19 +87,72 @@ func convertRow(row []string) YellowRow {
     ImprovementSurcharge: row[15],
     TotalAmt: row[16],
     CongestionSurcharge: row[17],
+    Validated: false,
+    Valid: isValid,
   }
 }
 
-func processRow(row []string) bool {
+func processRow(row []string) YellowRow {
   if len(row) != 18 {
-    return false
+    return YellowRow{Valid: false, Validated: true}
+  }
+
+  // FIXME: shortcut for header for now
+  if row[0] == "VendorID" {
+    return YellowRow{Valid: false, Validated: true}
   }
 
   yrow := convertRow(row)
 
-  fmt.Println(yrow)
+  return yrow
+}
 
-  return true
+func validateTripDistance(tripDist *string, valid *bool) float32 {
+  tripDistf, err := strconv.ParseFloat(*tripDist, 32)
+
+  if err != nil {
+    *valid = false
+    return -1.0
+  }
+
+  if tripDistf > 100.0 || tripDistf <= 0 {
+    *valid = false
+    return -1.0
+  }
+
+  return float32(tripDistf)
+}
+
+func validateVendorId(vendorId *string, valid *bool) int {
+
+  vid, err := strconv.Atoi(*vendorId)
+  if err != nil {
+    *valid = false
+    return -1
+  }
+
+  // NOTE: according to the data dictionary, the only valid values are 1 or 2
+  // https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
+  if vid != 1 && vid != 2 {
+    *valid = false
+    return -1
+  }
+
+  return vid
+}
+
+func invalidateRecord(record *YellowRow) *YellowRow {
+  record.Valid = false
+  record.Validated = false
+
+  return record
+}
+
+func validateRecord(record *YellowRow) *YellowRow {
+  //validateVendorId(record)
+
+
+  return record
 }
 
 func readFile(filename string) {
@@ -113,11 +170,14 @@ func readFile(filename string) {
     if err == io.EOF {
       break
     }
+
     if err != nil {
       log.Fatal(err)
     }
 
-    processRow(record)
+    processedRecord := processRow(record)
+    //validatedRecord := validateRecord(&processedRecord)
+    fmt.Println(processedRecord)
   }
 }
 
@@ -126,4 +186,15 @@ func main() {
 
   //readFile("data/yellow_tripdata_2019-06.csv")
   readFile("data/yellow_head.csv")
+
+  //i, j := 42, 2701
+
+  //p := &i         // point to i
+  //fmt.Println(p) // read i through the pointer
+  //*p = 21         // set i through the pointerinter
+  //fmt.Println(i)  // see the new value of i
+
+  //p = &j         // pointerint to j
+  //*p = *p / 37   // divide j through the pointer
+  //fmt.Println(j) // see the new value of j
 }
