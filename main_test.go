@@ -8,6 +8,7 @@ import (
 func TestValidateVendorId(t *testing.T) {
   /* Valid vendor Ids are 1 and 2 */
 
+  t.Parallel()
   vendorIdTests := []struct {
     vid string
     valid bool
@@ -20,17 +21,23 @@ func TestValidateVendorId(t *testing.T) {
   }
 
   for _, test := range vendorIdTests {
-    vid := validateVendorId(&test.vid, &test.valid)
+    test := test
+    testName := test.vid
+    t.Run(testName, func(t *testing.T) {
+      t.Parallel()
+      vid := validateVendorId(&test.vid, &test.valid)
 
-    if(vid != test.correctConvertedVID || test.valid != test.shouldBeValid) {
-      t.Errorf("vid: %d != %d; %t != %t", vid, test.correctConvertedVID, test.valid, test.shouldBeValid)
-    }
+      if(vid != test.correctConvertedVID || test.valid != test.shouldBeValid) {
+        t.Errorf("vid: %d != %d; %t != %t", vid, test.correctConvertedVID, test.valid, test.shouldBeValid)
+      }
+    })
   }
 }
 
 func TestValidateTripDistance(t *testing.T) {
   /* tripDistance should be a float in the range of (0.00, 100.00] */
 
+  t.Parallel()
   tdTests := []struct {
     td string
     valid bool
@@ -46,11 +53,16 @@ func TestValidateTripDistance(t *testing.T) {
   }
 
   for _, test := range tdTests {
-    convertedTd := validateTripDistance(&test.td, &test.valid)
+    test := test
+    testName := test.td
+    t.Run(testName, func(t *testing.T) {
+      t.Parallel()
+      convertedTd := validateTripDistance(&test.td, &test.valid)
 
-    if convertedTd != test.correctConvertedTd || test.valid != test.shouldBeValid {
-      t.Errorf("%s in should produce %f, not %f; valid should be %t, not %t",
+      if convertedTd != test.correctConvertedTd || test.valid != test.shouldBeValid {
+        t.Errorf("%s in should produce %f, not %f; valid should be %t, not %t",
         test.td, test.correctConvertedTd, convertedTd, test.shouldBeValid, test.valid)
-    }
+      }
+    })
   }
 }
