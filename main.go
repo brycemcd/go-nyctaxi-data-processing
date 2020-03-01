@@ -23,7 +23,7 @@ type YellowRow struct {
 	DropoffDttm          time.Time
 	PassengerCnt         int
 	TripDistance         float32
-	RatecodeID           string
+	RatecodeID           int
 	StoreAndFwdFlag      string
 	PULocationID         string
 	DOLcationID          string
@@ -62,7 +62,7 @@ func convertRow(row []string) YellowRow {
 		DropoffDttm:          processTime(row[2]),
 		PassengerCnt:         validatePassengerCnt(&row[3], &isValid),
 		TripDistance:         validateTripDistance(&row[4], &isValid),
-		RatecodeID:           row[5],
+		RatecodeID:           validateRatecodeID(&row[5], &isValid),
 		StoreAndFwdFlag:      row[6],
 		PULocationID:         row[7],
 		DOLcationID:          row[8],
@@ -93,6 +93,23 @@ func processRow(row []string) YellowRow {
 	yrow := convertRow(row)
 
 	return yrow
+}
+
+func validateRatecodeID(rcID *string, valid *bool) int {
+	i, err := strconv.Atoi(*rcID)
+
+	if err != nil {
+		*valid = false
+		return -1
+	}
+
+	minValid, maxValid := 1, 6
+	if i < minValid || i > maxValid {
+		*valid = false
+		return -1
+	}
+
+	return i
 }
 
 func validatePassengerCnt(passCnt *string, valid *bool) int {

@@ -97,3 +97,40 @@ func TestValidateTripDistance(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateRatecodeID(t *testing.T) {
+	/* RatecodeID is one of 1,2,3,4,5 or 6 according to data dictionary */
+
+	t.Parallel()
+	rcTests := []struct {
+		rc                 string
+		valid              bool
+		correctConvertedRC int
+		shouldBeValid      bool
+	}{
+		{"1", true, 1, true},
+		{"2", true, 2, true},
+		{"3", true, 3, true},
+		{"4", true, 4, true},
+		{"5", true, 5, true},
+		{"6", true, 6, true},
+		{"7", true, -1, false},
+		{"0", true, -1, false},
+		{"-2", true, -1, false},
+		{"foo", true, -1, false},
+	}
+
+	for _, test := range rcTests {
+		test := test
+		testName := test.rc
+		t.Run(testName, func(t *testing.T) {
+			t.Parallel()
+			convertedRC := validateRatecodeID(&test.rc, &test.valid)
+
+			if convertedRC != test.correctConvertedRC || test.valid != test.shouldBeValid {
+				t.Errorf("%s in should produce %d, not %d; valid should be %t, not %t",
+					test.rc, test.correctConvertedRC, convertedRC, test.shouldBeValid, test.valid)
+			}
+		})
+	}
+}
