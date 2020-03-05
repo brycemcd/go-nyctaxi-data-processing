@@ -26,7 +26,7 @@ type YellowRow struct {
 	RatecodeID           int
 	StoreAndFwdFlag      string
 	PULocationID         int
-	DOLcationID          string
+	DOLocationID         int
 	PaymentType          string
 	FareAmount           string
 	Extra                string
@@ -64,8 +64,8 @@ func convertRow(row []string) YellowRow {
 		TripDistance:         validateTripDistance(&row[4], &isValid),
 		RatecodeID:           validateRatecodeID(&row[5], &isValid),
 		StoreAndFwdFlag:      validateStoreAndFwdFlag(&row[6], &isValid),
-		PULocationID:         validatePULocationID(&row[7], &isValid),
-		DOLcationID:          row[8],
+		PULocationID:         validateLocationID(&row[7], &isValid),
+		DOLocationID:         validateLocationID(&row[8], &isValid),
 		PaymentType:          row[9],
 		FareAmount:           row[10],
 		Extra:                row[11],
@@ -95,7 +95,7 @@ func processRow(row []string) YellowRow {
 	return yrow
 }
 
-func validatePULocationID(lID *string, valid *bool) int {
+func validateLocationID(lID *string, valid *bool) int {
 	i, err := strconv.Atoi(*lID)
 
 	if err != nil {

@@ -52,6 +52,10 @@ func TestConvertRow(t *testing.T) {
 		t.Errorf("PULocationID not expected")
 	}
 
+	if yr.DOLocationID != 68 {
+		t.Errorf("DOLocationID not expected")
+	}
+
 }
 
 func TestValidateVendorId(t *testing.T) {
@@ -214,7 +218,7 @@ func TestValidateStoreAndFwdFlag(t *testing.T) {
 	}
 }
 
-func TestPULocationId(t *testing.T) {
+func TestLocationId(t *testing.T) {
 	/* valid values are integers between 1 and 265 according to data dictionary */
 
 	t.Parallel()
@@ -236,7 +240,7 @@ func TestPULocationId(t *testing.T) {
 		testName := test.lid
 		t.Run(testName, func(t *testing.T) {
 			t.Parallel()
-			convertedPULoc := validatePULocationID(&test.lid, &test.valid)
+			convertedPULoc := validateLocationID(&test.lid, &test.valid)
 
 			if convertedPULoc != test.correctConvertedLID || test.valid != test.shouldBeValid {
 				t.Errorf("%s in should produce %d, not %d; valid should be %t, not %t",
