@@ -5,6 +5,7 @@ variables:
   # Please edit to your GitLab project
   REPO_NAME: gitlab.com/brycemcd/go-nyctaxi-data-processing
   BINARY_NAME: nyctaxi-data-processing
+  DEPLOYMENT_DIR: nyctaxi
 
 # The problem is that to be able to use go get, one needs to put
 # the repository in the $GOPATH. So for example if your gitlab domain
@@ -43,6 +44,7 @@ stages:
   - build
   # TODO: this was part of the template. Implement later
   - deploy
+  - refresh_deployment
 
 format:
   stage: format
@@ -80,4 +82,15 @@ push_to_servers:
     #only:
     #    - master
     script:
-        - scp -v $BINARY_NAME brycemcd@hopper.thedevranch.net:/tmp/$BINARY_NAME
+        - ssh brycemcd@hopper.thedevranch.net "mkdir -p $DEPLOYMENT_DIR"
+        - scp -v $BINARY_NAME brycemcd@hopper.thedevranch.net:$DEPLOYMENT_DIR/$BINARY_NAME
+        
+restart_running_processes:
+    stage: refresh_deployment
+    tags:
+        - home-network
+    # FIXME: do this later
+    #only:
+    #    - master
+    script:
+        - ssh brycemcd@hopper.thedevranch.net "cd $DEPLOYMENT_DIR; docker run --rm -d -v $(pwd):/opt/project --name foo"
