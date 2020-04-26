@@ -69,7 +69,7 @@ compile:
     - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/$BINARY_NAME
   artifacts:
     paths:
-      - ny-taxi-data-processing
+      - $BINARY_NAME
     expire_in: 1 week
 
 push_to_servers:
