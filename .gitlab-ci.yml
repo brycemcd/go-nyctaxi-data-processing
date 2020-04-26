@@ -16,6 +16,26 @@ before_script:
   - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
   - cd $GOPATH/src/$REPO_NAME
+  
+  ## set up for secure copying:
+  # NOTE: this was heavily sourced from https://gitlab.com/gitlab-org/gitlab-runner/issues/2386
+  # Run ssh-agent (inside the build environment)
+  - eval $(ssh-agent -s)
+
+  # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+  - ssh-add <(echo "$SSH_DEPLOY_KEY")
+  # For Docker builds disable host key checking. Be aware that by adding that
+  # you are suspectible to man-in-the-middle attacks.
+  # WARNING: Use this only with the Docker executor, if you use it with shell
+  # you will overwrite your user's SSH config.
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  # In order to properly check the server's host key, assuming you created the
+  # SSH_SERVER_HOSTKEYS variable previously, uncomment the following two lines
+  # instead.
+  - echo "$SSH_DEPLOY_KEY" > /root/.ssh/id_rsa
+  - chmod 600 /root/.ssh/id_rsa && chmod 700 /root/.ssh
+
 
 stages:
   - format
@@ -60,4 +80,4 @@ push_to_servers:
     #only:
     #    - master
     script:
-        - scp $BINARY_NAME brycemcd@hopper.thedevranch.net:/tmp/$BINARY_NAME
+        - scp -v $BINARY_NAME brycemcd@hopper.thedevranch.net:/tmp/$BINARY_NAME
