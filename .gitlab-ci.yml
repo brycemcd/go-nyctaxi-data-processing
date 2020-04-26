@@ -4,6 +4,7 @@ image: brycemcd/basic-go
 variables:
   # Please edit to your GitLab project
   REPO_NAME: gitlab.com/brycemcd/go-nyctaxi-data-processing
+  BINARY_NAME: nyctaxi-data-processing
 
 # The problem is that to be able to use go get, one needs to put
 # the repository in the $GOPATH. So for example if your gitlab domain
@@ -45,7 +46,18 @@ compile:
   tags:
     - goApp
   script:
-    - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/ny-taxi-data-processing
+    - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/$BINARY_NAME
   artifacts:
     paths:
       - ny-taxi-data-processing
+    expire_in: 1 week
+
+push_to_servers:
+    stage: deploy
+    tags:
+        - home-network
+    # FIXME: do this later
+    #only:
+    #    - master
+    script:
+        - scp $BINARY_NAME brycemcd@hopper.thedevranch.net:/tmp/$BINARY_NAME
