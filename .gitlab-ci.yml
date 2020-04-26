@@ -22,7 +22,7 @@ stages:
   - test
   - build
   # TODO: this was part of the template. Implement later
-  #- deploy
+  - deploy
 
 format:
   stage: format
